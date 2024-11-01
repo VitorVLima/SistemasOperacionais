@@ -2,24 +2,22 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#define NUM_FILOSOFOS 5
-#define MAX_FILOSOFOS_COMENDO 2 // Número máximo de filósofos que podem comer ao mesmo tempo
-
-pthread_mutex_t talheres[NUM_FILOSOFOS]; // Talheres
-pthread_mutex_t mutex_acesso; // Para controlar o acesso ao número de filósofos comendo
-int cont_filosofo_comendo = 0; // Contador de filósofos comendo
+pthread_mutex_t talheres[5];
+pthread_mutex_t mutex_acesso;
+int cont_filosofo_comendo = 0;
 
 void* atividade_filosofos(void* arg) {
     int id = *(int*)arg;
-
+    int max_filosofos_comendo = 2; // Número máximo de filósofos que podem comer ao mesmo tempo
+   
+    
     while (1) {
-        // O filósofo está pensando
         printf("Filósofo %d está pensando.\n", id);
         sleep(5); // O filósofo pensa por 5 segundos
 
-        // Tenta comer
+        // Tenta comer e caso tenha menos de 2 comendo ele acessa os talheres
         pthread_mutex_lock(&mutex_acesso);
-        while (cont_filosofo_comendo >= MAX_FILOSOFOS_COMENDO) {
+        while (cont_filosofo_comendo >= max_filosofos_comendo) {
             pthread_mutex_unlock(&mutex_acesso);
             sleep(1); // Espera um segundo antes de tentar novamente
             pthread_mutex_lock(&mutex_acesso);
@@ -28,11 +26,10 @@ void* atividade_filosofos(void* arg) {
         pthread_mutex_unlock(&mutex_acesso);
 
         // O filósofo pega os talheres
-        pthread_mutex_lock(&talheres[id]); // Pega o talher à esquerda
+        pthread_mutex_lock(&talheres[id]);
         printf("Filósofo %d pegou o talher à esquerda (%d).\n", id, id);
-        
-        pthread_mutex_lock(&talheres[(id + 1) % NUM_FILOSOFOS]); // Pega o talher à direita
-        printf("Filósofo %d pegou o talher à direita (%d).\n", id, (id + 1) % NUM_FILOSOFOS);
+        pthread_mutex_lock(&talheres[(id + 1) % 5]); 
+        printf("Filósofo %d pegou o talher à direita (%d).\n", id, (id + 1) % 5);
 
         // O filósofo come
         printf("Filósofo %d está comendo.\n", id);
@@ -40,8 +37,10 @@ void* atividade_filosofos(void* arg) {
 
         // O filósofo solta os talheres
         pthread_mutex_unlock(&talheres[id]);
-        pthread_mutex_unlock(&talheres[(id + 1) % NUM_FILOSOFOS]);
-        printf("Filósofo %d soltou os talheres da esquerda (%d) e da direita (%d).\n", id, id, (id + 1) % NUM_FILOSOFOS);
+        pthread_mutex_unlock(&talheres[(id + 1) % 5]);
+
+        // Filósofo terminou de comer
+        printf("Filósofo %d soltou os talheres da esquerda (%d) e da direita (%d).\n", id, id, (id + 1) % 5);
 
         // Atualiza o número de filósofos comendo
         pthread_mutex_lock(&mutex_acesso);
@@ -53,33 +52,28 @@ void* atividade_filosofos(void* arg) {
 }
 
 int main() {
-    pthread_t filosofos[NUM_FILOSOFOS];
-    int ids[NUM_FILOSOFOS];
+    pthread_t filosofos[5];
+    int ids[5];
 
-    // Inicializa os mutexes
-    for (int i = 0; i < NUM_FILOSOFOS; i++) {
+    for (int i = 0; i < 5; i++) {
         pthread_mutex_init(&talheres[i], NULL);
     }
     pthread_mutex_init(&mutex_acesso, NULL);
 
-    // Cria as threads dos filósofos
-    for (int i = 0; i < NUM_FILOSOFOS; i++) {
+    for (int i = 0; i < 5; i++) {
         ids[i] = i;
-        pthread_create(&filosofos[i], NULL, atividade_filosofos, (void*)&ids[i]);
+        pthread_create(&filosofos[i], NULL, atividade_filosofos, &ids[i]);
     }
 
-
-    for (int i = 0; i < NUM_FILOSOFOS; i++) {
+    for (int i = 0; i < 5; i++) {
         pthread_join(filosofos[i], NULL);
     }
-
     
-    for (int i = 0; i < NUM_FILOSOFOS; i++) {
+    for (int i = 0; i < 5; i++) {
         pthread_mutex_destroy(&talheres[i]);
     }
     pthread_mutex_destroy(&mutex_acesso);
 
     return 0;
 }
-
 
