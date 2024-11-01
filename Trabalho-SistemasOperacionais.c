@@ -14,8 +14,9 @@ void* atividade_filosofos(void* arg) {
    
     
     while (1) {
-        printf("Filósofo %d está pensando.\n", id);
-        sleep(5); // O filósofo pensa por 5 segundos
+        printf("O Filosofo %d iniciou o descanco\n", id);
+        sleep(5);
+        printf("O Filosofo %d finalizou o descanco\n", id);
 
         // Tenta comer e caso tenha menos de 2 comendo ele acessa os talheres
         pthread_mutex_lock(&mutex_acesso);
@@ -49,8 +50,6 @@ void* atividade_filosofos(void* arg) {
         cont_filosofo_comendo--;
         pthread_mutex_unlock(&mutex_acesso);
     }
-
-    return NULL;
 }
 
 int main() {
