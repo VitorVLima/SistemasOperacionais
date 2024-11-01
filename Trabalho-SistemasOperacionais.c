@@ -2,6 +2,8 @@
 #include <pthread.h>
 #include <unistd.h>
 
+//Nome :  Vitor Vinicius Lima Silva
+
 pthread_mutex_t talheres[5];
 pthread_mutex_t mutex_acesso;
 int cont_filosofo_comendo = 0;
