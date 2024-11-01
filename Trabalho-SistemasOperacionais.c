@@ -12,7 +12,6 @@ void* atividade_filosofos(void* arg) {
     int id = *(int*)arg;
     int max_filosofos_comendo = 2; // Número máximo de filósofos que podem comer ao mesmo tempo
    
-    
     while (1) {
         printf("O Filosofo %d iniciou o descanco\n", id);
         sleep(5);
@@ -28,21 +27,17 @@ void* atividade_filosofos(void* arg) {
         cont_filosofo_comendo++;
         pthread_mutex_unlock(&mutex_acesso);
 
-        // O filósofo pega os talheres
+        // O filósofo pega os talheres e começou a comer
         pthread_mutex_lock(&talheres[id]);
         printf("Filósofo %d pegou o talher à esquerda (%d).\n", id, id);
         pthread_mutex_lock(&talheres[(id + 1) % 5]); 
         printf("Filósofo %d pegou o talher à direita (%d).\n", id, (id + 1) % 5);
-
-        // O filósofo come
         printf("Filósofo %d está comendo.\n", id);
-        sleep(1); // O filósofo come por 1 segundo
+        sleep(1);
 
-        // O filósofo solta os talheres
+        // O filósofo terminou de comer e solta os talheres
         pthread_mutex_unlock(&talheres[id]);
         pthread_mutex_unlock(&talheres[(id + 1) % 5]);
-
-        // Filósofo terminou de comer
         printf("Filósofo %d soltou os talheres da esquerda (%d) e da direita (%d).\n", id, id, (id + 1) % 5);
 
         // Atualiza o número de filósofos comendo
